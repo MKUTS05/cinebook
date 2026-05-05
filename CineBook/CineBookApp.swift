@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct CineBookApp: App {
+    /// Single Core Data stack shared across the whole app.
+    /// Touching `.shared` triggers store loading and first-launch seeding.
+    let persistenceController = PersistenceController.shared
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }
