@@ -15,7 +15,7 @@ struct Movie: Identifiable {
     let duration: String
     let rating: String
     let synopsis: String
-    let imageName: String // Used for the poster
+    let imageName: String 
 }
 
 

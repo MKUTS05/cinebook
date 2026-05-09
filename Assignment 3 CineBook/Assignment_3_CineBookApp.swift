@@ -11,7 +11,7 @@ import SwiftUI
 struct Assignment_3_CineBookApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
     }
 }

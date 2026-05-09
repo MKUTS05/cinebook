@@ -8,7 +8,7 @@
 import SwiftUI
 
 // MARK: - Local Models
-// We define these here to manage the interactive state of our grid
+
 enum SeatStatus {
     case available, selected, booked
 }
@@ -23,14 +23,14 @@ struct Seat: Identifiable, Equatable {
 struct SeatSelectionView: View {
     let movie: Movie
     
-    // The 2D array holding our grid state
+    
     @State private var grid: [[Seat]] = []
     
     let rowLabels = ["A", "B", "C", "D", "E", "F", "G", "H"]
     let columns = 6
     let ticketPrice: Double = 14.00
     
-    // Computed properties to update the UI dynamically
+    
     var selectedSeats: [Seat] {
         grid.flatMap { $0 }.filter { $0.status == .selected }
     }
@@ -89,13 +89,13 @@ struct SeatSelectionView: View {
                     VStack(spacing: 12) {
                         ForEach(0..<grid.count, id: \.self) { rowIndex in
                             HStack(spacing: 12) {
-                                // Row Label (Left)
+                                
                                 Text(rowLabels[rowIndex])
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                     .frame(width: 20, alignment: .leading)
                                 
-                                // Seats
+                                
                                 ForEach(0..<grid[rowIndex].count, id: \.self) { colIndex in
                                     let seat = grid[rowIndex][colIndex]
                                     
@@ -105,7 +105,7 @@ struct SeatSelectionView: View {
                                         }
                                 }
                                 
-                                // Row Label (Right)
+                                
                                 Text(rowLabels[rowIndex])
                                     .font(.caption)
                                     .foregroundColor(.secondary)
@@ -126,95 +126,95 @@ struct SeatSelectionView: View {
             }
             
             // MARK: - Bottom Checkout Bar
-                        VStack {
-                            Divider()
-                            HStack(alignment: .bottom) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("SEATS: \(selectedSeatString)")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    
-                                    Text(String(format: "$%.2f", totalPrice))
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                }
-                                
-                                Spacer()
-                                
-                                NavigationLink(destination: ConfirmationView(movie: movie, selectedSeats: selectedSeats)) {
-                                    HStack {
-                                        Text("Continue")
-                                            .fontWeight(.semibold)
-                                        Image(systemName: "arrow.right")
-                                    }
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 14)
-                                    .background(selectedSeats.isEmpty ? Color.gray : Color.blue)
-                                    .cornerRadius(12)
-                                }
-                                .disabled(selectedSeats.isEmpty)
-                            }
-                            .padding()
-                            .background(Color(UIColor.systemBackground))
-                        }
+            VStack {
+                Divider()
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("SEATS: \(selectedSeatString)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(String(format: "$%.2f", totalPrice))
+                            .font(.title2)
+                            .fontWeight(.bold)
                     }
-                    .navigationBarTitleDisplayMode(.inline)
-                    .onAppear {
-                        if grid.isEmpty {
-                            generateMockSeats()
-                        }
-                    }
-                } // <-- This officially closes the 'body' property
-
-    // MARK: - Interaction Logic
-        private func toggleSeat(row: Int, col: Int) {
-            var seat = grid[row][col]
-            
-            // Cannot select a booked seat
-            if seat.status == .booked { return }
-            
-            // Toggle between available and selected
-            seat.status = (seat.status == .selected) ? .available : .selected
-            
-            // Update the array to trigger the UI refresh
-            grid[row][col] = seat
-        }
-        
-        // MARK: - Mock Data Generator
-        private func generateMockSeats() {
-            var newGrid: [[Seat]] = []
-            for r in 0..<rowLabels.count {
-                var rowArray: [Seat] = []
-                for c in 0..<columns {
-                    // Randomly assign some seats as booked so the grid looks realistic
-                    let isBooked = Int.random(in: 1...10) > 8
-                    let status: SeatStatus = isBooked ? .booked : .available
                     
-                    let seat = Seat(row: rowLabels[r], number: c + 1, status: status)
-                    rowArray.append(seat)
+                    Spacer()
+                    
+                    NavigationLink(destination: ConfirmationView(movie: movie, selectedSeats: selectedSeats)) {
+                        HStack {
+                            Text("Continue")
+                                .fontWeight(.semibold)
+                            Image(systemName: "arrow.right")
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 14)
+                        .background(selectedSeats.isEmpty ? Color.gray : Color.blue)
+                        .cornerRadius(12)
+                    }
+                    .disabled(selectedSeats.isEmpty)
                 }
-                newGrid.append(rowArray)
+                .padding()
+                .background(Color(UIColor.systemBackground))
             }
-            grid = newGrid
         }
-    } // <--- THIS IS THE MAGICAL BRACKET THAT CLOSES THE STRUCT
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            if grid.isEmpty {
+                generateMockSeats()
+            }
+        }
+    }
+    
+    // MARK: - Interaction Logic
+    private func toggleSeat(row: Int, col: Int) {
+        var seat = grid[row][col]
+        
+        
+        if seat.status == .booked { return }
+        
+        
+        seat.status = (seat.status == .selected) ? .available : .selected
+        
+        
+        grid[row][col] = seat
+    }
+    
+    // MARK: - Mock Data Generator
+    private func generateMockSeats() {
+        var newGrid: [[Seat]] = []
+        for r in 0..<rowLabels.count {
+            var rowArray: [Seat] = []
+            for c in 0..<columns {
+                
+                let isBooked = Int.random(in: 1...10) > 8
+                let status: SeatStatus = isBooked ? .booked : .available
+                
+                let seat = Seat(row: rowLabels[r], number: c + 1, status: status)
+                rowArray.append(seat)
+            }
+            newGrid.append(rowArray)
+        }
+        grid = newGrid
+    }
+}
 
-    // MARK: - Helper Views
+
 // MARK: - Helper Views
 struct SeatIcon: View {
     let status: SeatStatus
     
     var body: some View {
         RoundedRectangle(cornerRadius: 8)
-            // Color logic based on status
+        
             .fill(status == .selected ? Color.blue : (status == .booked ? Color.gray.opacity(0.3) : Color.clear))
             .frame(width: 35, height: 35)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(status == .available ? Color.gray : Color.clear, lineWidth: 2)
             )
-            // A subtle scale effect when selected makes it feel premium
+        
             .scaleEffect(status == .selected ? 1.05 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: status)
     }
@@ -226,7 +226,7 @@ struct LegendItem: View {
     
     var body: some View {
         HStack(spacing: 6) {
-            // Drawing a custom, smaller shape specifically for the legend
+            
             RoundedRectangle(cornerRadius: 4)
                 .fill(status == .selected ? Color.blue : (status == .booked ? Color.gray.opacity(0.3) : Color.clear))
                 .frame(width: 16, height: 16)

@@ -16,7 +16,7 @@ struct MovieDetailView: View {
             VStack(alignment: .leading, spacing: 24) {
                 
                 // MARK: - Hero Poster
-                // In the wireframe, this spans the full width
+                
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 350)
@@ -25,7 +25,7 @@ struct MovieDetailView: View {
                             .foregroundColor(.gray)
                             .font(.headline)
                     )
-                // This modifier pushes the image up under the navigation bar
+                
                     .ignoresSafeArea(edges: .top)
                 
                 VStack(alignment: .leading, spacing: 20) {
@@ -48,7 +48,7 @@ struct MovieDetailView: View {
                         
                         Spacer()
                         
-                        // Rating Badge (e.g., PG13)
+                        
                         Text(movie.rating)
                             .font(.caption)
                             .fontWeight(.bold)
@@ -65,11 +65,11 @@ struct MovieDetailView: View {
                             .font(.caption)
                             .fontWeight(.bold)
                             .foregroundColor(.secondary)
-                            .tracking(1.5) // Adds cinematic letter spacing
+                            .tracking(1.5)
                         
                         Text(movie.synopsis)
                             .font(.body)
-                            .lineSpacing(4) // Makes the paragraph easier to read
+                            .lineSpacing(4)
                     }
                     
                     Divider()
@@ -82,8 +82,7 @@ struct MovieDetailView: View {
                             .foregroundColor(.secondary)
                             .tracking(1.5)
                         
-                        // Hardcoding the layout from the wireframe for now.
-                        // Person A will eventually feed real CoreData sessions here.
+                        
                         VStack(alignment: .leading, spacing: 12) {
                             Text("TODAY MAY 5")
                                 .font(.headline)
@@ -94,7 +93,7 @@ struct MovieDetailView: View {
                                     .foregroundColor(.secondary)
                                     .frame(width: 60, alignment: .leading)
                                 
-                                // This button will eventually navigate to the Seat Picker
+                                
                                 NavigationLink(destination: SeatSelectionView(movie: movie)) {
                                     Text("14:30")
                                         .font(.subheadline)
@@ -109,7 +108,7 @@ struct MovieDetailView: View {
                         }
                     }
                     .padding(.horizontal)
-                    // Pulls the text up slightly so the gap between the image and text isn't massive
+                    
                     .offset(y: -20)
                 }
             }
@@ -119,7 +118,7 @@ struct MovieDetailView: View {
 }
 
 #Preview {
-    // Wrapping the preview in a NavigationView so we can see the back button behavior
+    
     NavigationView {
         MovieDetailView(movie: MockData.movies[0])
     }

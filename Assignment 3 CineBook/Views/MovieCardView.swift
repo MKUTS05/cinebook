@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 struct MovieCardView: View {
     let movie: Movie
     

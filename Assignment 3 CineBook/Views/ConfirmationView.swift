@@ -11,7 +11,7 @@ struct ConfirmationView: View {
     let movie: Movie
     let selectedSeats: [Seat]
     
-    // Hardcoded session details for now (Person A will provide these from CoreData later)
+    
     let sessionDate = "Tue May 5"
     let sessionTime = "14:30"
     let roomName = "Room 2"
@@ -99,7 +99,7 @@ struct ConfirmationView: View {
                     }
                     Spacer()
                     Button("Change") {
-                        // Action placeholder
+                        
                     }
                     .font(.subheadline)
                 }
@@ -119,7 +119,7 @@ struct ConfirmationView: View {
                 }
                 
                 Button(action: {
-                    // This is where Person A's CoreData save logic will go
+                    
                     print("Booking Confirmed!")
                 }) {
                     Text("Confirm Booking")
@@ -132,7 +132,7 @@ struct ConfirmationView: View {
                 }
                 .padding(.top, 8)
                 
-                // Footer
+                
                 Text("Free cancellation up to 2 hours before showtime")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -171,7 +171,7 @@ struct DetailRow: View {
 
 #Preview {
     NavigationView {
-        // Passing dummy seats for the preview
+        
         ConfirmationView(movie: MockData.movies[0], selectedSeats: [
             Seat(row: "D", number: 4, status: .selected),
             Seat(row: "D", number: 5, status: .selected),

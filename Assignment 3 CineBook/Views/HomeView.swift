@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    // 2-column grid layout
+    
     let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -55,7 +55,7 @@ struct HomeView: View {
                             NavigationLink(destination: MovieDetailView(movie: movie)) {
                                 MovieCardView(movie: movie)
                             }
-                            .buttonStyle(PlainButtonStyle()) // Keeps the text color from turning default blue
+                            .buttonStyle(PlainButtonStyle()) 
                         }
                     }
                     .padding(.horizontal)
