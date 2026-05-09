@@ -25,7 +25,7 @@ struct MovieDetailView: View {
                             .foregroundColor(.gray)
                             .font(.headline)
                     )
-                    // This modifier pushes the image up under the navigation bar
+                // This modifier pushes the image up under the navigation bar
                     .ignoresSafeArea(edges: .top)
                 
                 VStack(alignment: .leading, spacing: 20) {
@@ -95,7 +95,7 @@ struct MovieDetailView: View {
                                     .frame(width: 60, alignment: .leading)
                                 
                                 // This button will eventually navigate to the Seat Picker
-                                NavigationLink(destination: Text("Seat Picker for 14:30")) {
+                                NavigationLink(destination: SeatSelectionView(movie: movie)) {
                                     Text("14:30")
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
@@ -108,13 +108,13 @@ struct MovieDetailView: View {
                             }
                         }
                     }
+                    .padding(.horizontal)
+                    // Pulls the text up slightly so the gap between the image and text isn't massive
+                    .offset(y: -20)
                 }
-                .padding(.horizontal)
-                // Pulls the text up slightly so the gap between the image and text isn't massive
-                .offset(y: -20)
             }
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -124,3 +124,6 @@ struct MovieDetailView: View {
         MovieDetailView(movie: MockData.movies[0])
     }
 }
+
+
+
