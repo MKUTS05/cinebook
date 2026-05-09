@@ -225,16 +225,22 @@ struct LegendItem: View {
     let text: String
     
     var body: some View {
-        HStack(spacing: 8) {
-            SeatIcon(status: status)
-                .frame(width: 20, height: 20)
+        HStack(spacing: 6) {
+            // Drawing a custom, smaller shape specifically for the legend
+            RoundedRectangle(cornerRadius: 4)
+                .fill(status == .selected ? Color.blue : (status == .booked ? Color.gray.opacity(0.3) : Color.clear))
+                .frame(width: 16, height: 16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(status == .available ? Color.gray : Color.clear, lineWidth: 1.5)
+                )
+            
             Text(text)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
     }
 }
-
 #Preview {
     NavigationView {
         SeatSelectionView(movie: MockData.movies[0])
