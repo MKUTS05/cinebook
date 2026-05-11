@@ -10,6 +10,9 @@ import CoreData
 struct PersistenceController {
 
     /// Shared instance used by the running app.
+    /// @MainActor ensures it is only initialised on the main thread, which is
+    /// required because init touches viewContext and calls DataSeeder on it.
+    @MainActor
     static let shared = PersistenceController()
 
     /// In-memory instance pre-populated with seed data, intended for SwiftUI previews.

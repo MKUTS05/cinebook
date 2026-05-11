@@ -5,6 +5,7 @@
 //  Created by MK UNI on 5/5/2026.
 //
 
+import CoreData
 import SwiftUI
 
 @main
