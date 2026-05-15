@@ -71,6 +71,27 @@ enum DataSeeder {
         )
     ]
 
+    // Each room's number and the price surcharge over the base price.
+    private static let rooms: [(number: Int16, surcharge: Double)] = [
+        (number: 1, surcharge: 0.00),   // Standard
+        (number: 2, surcharge: 0.00),   // Standard
+        (number: 3, surcharge: 5.00),   // IMAX
+        (number: 4, surcharge: 3.00),   // Premium
+        (number: 5, surcharge: 7.00),   // Gold Class
+    ]
+
+    // Time slots seeded per room per day, with a small price increment for later shows.
+    private static let timeSlots: [(hour: Int, minute: Int, surcharge: Double)] = [
+        (hour: 10, minute: 30, surcharge: 0.00),
+        (hour: 13, minute: 00, surcharge: 0.00),
+        (hour: 16, minute: 00, surcharge: 1.00),
+        (hour: 19, minute: 00, surcharge: 1.50),
+        (hour: 21, minute: 30, surcharge: 2.00),
+    ]
+
+    private static let daysToSeed = 3
+    private static let basePrice  = 12.50
+
     private static let seatRows: [String] = ["A", "B", "C", "D", "E", "F", "G", "H"]
     private static let seatsPerRow: ClosedRange<Int16> = 1...10
 
@@ -80,25 +101,33 @@ enum DataSeeder {
         let calendar = Calendar.current
         let today = Date()
 
-        for (movieIndex, sample) in sampleMovies.enumerated() {
+        for sample in sampleMovies {
             let movie = Movie(context: context)
-            movie.id = UUID()
-            movie.title = sample.title
-            movie.genre = sample.genre
-            movie.duration = sample.duration
-            movie.synopsis = sample.synopsis
+            movie.id        = UUID()
+            movie.title     = sample.title
+            movie.genre     = sample.genre
+            movie.duration  = sample.duration
+            movie.synopsis  = sample.synopsis
             movie.posterImageName = sample.poster.rawValue
 
-            for sessionIndex in 0..<3 {
-                let session = makeSession(
-                    for: movie,
-                    movieIndex: movieIndex,
-                    sessionIndex: sessionIndex,
-                    today: today,
-                    calendar: calendar,
-                    in: context
-                )
-                attachFullSeatLayout(to: session, in: context)
+            for room in rooms {
+                for daysAhead in 1...daysToSeed {
+                    let baseDay = calendar.date(byAdding: .day, value: daysAhead, to: today) ?? today
+                    for slot in timeSlots {
+                        let session = Session(context: context)
+                        session.id         = UUID()
+                        session.movie      = movie
+                        session.roomNumber = room.number
+                        session.price      = basePrice + room.surcharge + slot.surcharge
+                        session.dateTime   = calendar.date(
+                            bySettingHour: slot.hour,
+                            minute: slot.minute,
+                            second: 0,
+                            of: baseDay
+                        ) ?? baseDay
+                        attachFullSeatLayout(to: session, in: context)
+                    }
+                }
             }
         }
 
@@ -109,38 +138,15 @@ enum DataSeeder {
         }
     }
 
-    private static func makeSession(
-        for movie: Movie,
-        movieIndex: Int,
-        sessionIndex: Int,
-        today: Date,
-        calendar: Calendar,
-        in context: NSManagedObjectContext
-    ) -> Session {
-        let session = Session(context: context)
-        session.id = UUID()
-        session.movie = movie
-
-        let daysAhead = sessionIndex + 1
-        let hour = 14 + sessionIndex * 3
-        let baseDay = calendar.date(byAdding: .day, value: daysAhead, to: today) ?? today
-        session.dateTime = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: baseDay) ?? baseDay
-
-        session.roomNumber = Int16(((movieIndex + sessionIndex) % 5) + 1)
-        session.price = 12.50 + Double(sessionIndex) * 1.50
-
-        return session
-    }
-
     private static func attachFullSeatLayout(to session: Session, in context: NSManagedObjectContext) {
         for row in seatRows {
             for number in seatsPerRow {
-                let seat = Seat(context: context)
-                seat.id = UUID()
-                seat.row = row
-                seat.number = number
+                let seat      = Seat(context: context)
+                seat.id       = UUID()
+                seat.row      = row
+                seat.number   = number
                 seat.isBooked = false
-                seat.session = session
+                seat.session  = session
             }
         }
     }

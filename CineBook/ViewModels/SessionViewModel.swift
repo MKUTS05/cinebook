@@ -6,6 +6,7 @@ import Foundation
 final class SessionViewModel: ObservableObject {
     @Published private(set) var sessions: [Session] = []
     @Published private(set) var sessionsByDate: [(date: Date, label: String, sessions: [Session])] = []
+    @Published private(set) var theatres: [Theatre] = []
 
     private let context: NSManagedObjectContext
     private let movie: Movie
@@ -32,19 +33,33 @@ final class SessionViewModel: ObservableObject {
         request.predicate = NSPredicate(format: "movie == %@", movie)
         request.sortDescriptors = [NSSortDescriptor(keyPath: \Session.dateTime, ascending: true)]
         sessions = (try? context.fetch(request)) ?? []
-        buildDateGroups()
+        sessionsByDate = groupByDate(sessions)
+        theatres = Array(Set(sessions.map { Theatre(roomNumber: $0.roomNumber) }))
+            .sorted { $0.roomNumber < $1.roomNumber }
     }
 
-    private func buildDateGroups() {
+    /// Sessions for a specific theatre, grouped into date buckets.
+    func sessionsByDate(for theatre: Theatre) -> [(date: Date, label: String, sessions: [Session])] {
+        groupByDate(sessions.filter { $0.roomNumber == theatre.roomNumber })
+    }
+
+    func isFull(_ session: Session) -> Bool {
+        guard let seats = session.seats as? Set<Seat>, !seats.isEmpty else { return false }
+        return seats.allSatisfy { $0.isBooked }
+    }
+
+    // MARK: - Private
+
+    private func groupByDate(_ input: [Session]) -> [(date: Date, label: String, sessions: [Session])] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
 
-        let grouped = Dictionary(grouping: sessions) { session in
+        let grouped = Dictionary(grouping: input) { session in
             calendar.startOfDay(for: session.dateTime ?? .distantFuture)
         }
 
-        sessionsByDate = grouped.keys.sorted().map { date in
+        return grouped.keys.sorted().map { date in
             let label: String
             if calendar.isDate(date, inSameDayAs: today) {
                 label = "Today"
@@ -58,10 +73,5 @@ final class SessionViewModel: ObservableObject {
             }
             return (date: date, label: label, sessions: sorted)
         }
-    }
-
-    func isFull(_ session: Session) -> Bool {
-        guard let seats = session.seats as? Set<Seat>, !seats.isEmpty else { return false }
-        return seats.allSatisfy { $0.isBooked }
     }
 }
