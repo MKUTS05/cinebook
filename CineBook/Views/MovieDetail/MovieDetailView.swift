@@ -71,54 +71,45 @@ struct MovieDetailView: View {
 
                     Divider()
 
-                    // MARK: - Sessions
+                    // MARK: - Theatre Selection
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("SESSIONS")
+                        Text("SELECT THEATRE")
                             .font(.caption)
                             .fontWeight(.bold)
                             .foregroundColor(.secondary)
                             .tracking(1.5)
 
-                        if sessionVM.sessionsByDate.isEmpty {
+                        if sessionVM.theatres.isEmpty {
                             Text("No sessions available")
                                 .foregroundColor(.secondary)
                                 .font(.subheadline)
                         } else {
-                            ForEach(sessionVM.sessionsByDate, id: \.date) { group in
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text(group.label)
-                                        .font(.headline)
-
-                                    ForEach(group.sessions, id: \.objectID) { session in
-                                        let full = sessionVM.isFull(session)
-                                        HStack(spacing: 16) {
-                                            Text("Room \(session.roomNumber)")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                                .frame(width: 64, alignment: .leading)
-
-                                            NavigationLink(destination: SeatPickerView(session: session)) {
-                                                Text(timeString(session.dateTime))
-                                                    .font(.subheadline)
-                                                    .fontWeight(.semibold)
-                                                    .padding(.horizontal, 16)
-                                                    .padding(.vertical, 8)
-                                                    .background(
-                                                        (full ? Color.gray : Color.blue).opacity(0.1)
-                                                    )
-                                                    .foregroundColor(full ? .gray : .blue)
-                                                    .cornerRadius(8)
-                                            }
-                                            .disabled(full)
-
-                                            if full {
-                                                Text("Full")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                        }
-                                    }
+                            let now = Date()
+                            ForEach(sessionVM.theatres) { theatre in
+                                let theatreSessions = sessionVM.sessions.filter {
+                                    $0.roomNumber == theatre.roomNumber
                                 }
+                                // soldOut = every session has all seats booked
+                                let soldOut = theatreSessions.allSatisfy { sessionVM.isFull($0) }
+                                // upcoming = future sessions that still have seats
+                                let upcoming = theatreSessions.filter {
+                                    ($0.dateTime ?? .distantPast) > now && !sessionVM.isFull($0)
+                                }.count
+                                let minPrice = theatreSessions.map(\.price).min() ?? 0
+
+                                NavigationLink(destination: TheatreSessionsView(
+                                    theatre: theatre,
+                                    movie: movie,
+                                    sessionVM: sessionVM
+                                )) {
+                                    TheatreCard(
+                                        theatre: theatre,
+                                        upcomingCount: upcoming,
+                                        soldOut: soldOut,
+                                        minPrice: minPrice
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                     }
@@ -129,15 +120,65 @@ struct MovieDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private static let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.timeStyle = .short
-        return f
-    }()
+}
 
-    private func timeString(_ date: Date?) -> String {
-        guard let date else { return "—" }
-        return Self.timeFormatter.string(from: date)
+private struct TheatreCard: View {
+    let theatre: Theatre
+    let upcomingCount: Int
+    let soldOut: Bool
+    let minPrice: Double
+
+    private var dimmed: Bool { upcomingCount == 0 }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.blue.opacity(0.12))
+                    .frame(width: 44, height: 44)
+                Image(systemName: "film.stack")
+                    .foregroundColor(.blue)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(theatre.displayName)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Text(theatre.typeName)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 3) {
+                if soldOut {
+                    Text("Sold out")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else if upcomingCount == 0 {
+                    Text("No upcoming")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("\(upcomingCount) session\(upcomingCount == 1 ? "" : "s")")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(String(format: "from $%.2f", minPrice))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                }
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(Color(.tertiaryLabel))
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+        .opacity(dimmed ? 0.5 : 1)
     }
 }
 
